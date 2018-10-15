@@ -3,50 +3,109 @@
  *  Date:
  *  Description:
  **************************************************************************** */
+
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-    // create n-by-n grid, with all sites blocked
-    // corner case:  , isOpen(), or isFull() is outside its prescribed range.
-    // corner case: The constructor should throw a java.lang.IllegalArgumentException if n ≤ 0.
+    private final int N;
+    private final int virtualTop;
+    private final int virtualBottom;
+    private final WeightedQuickUnionUF uf;
+    private boolean[] opens;
+    private int openSitesNum;
+
     public Percolation(int n) {
+        if (n <= 0) {
+            throw new java.lang.IllegalArgumentException();
+        }
 
+        N = n;
+        int gridSize = N * N;
+        openSitesNum = 0;
+        virtualTop = 0;
+        virtualBottom = gridSize + 1;
+
+        opens = new boolean[gridSize + 2];
+        opens[virtualTop] = true;
+        opens[virtualBottom] = true;
+
+        uf = new WeightedQuickUnionUF(gridSize + 2);
+
+        connectUfIdxToRow(virtualTop, 1);
+        connectUfIdxToRow(virtualBottom, N);
     }
 
-    // open site (row, col) if it is not open already
-    // corner case: Throw a java.lang.IllegalArgumentException
-    // if any argument to open() is outside its prescribed range
     public void open(int row, int col) {
+        if (!isValid(row) || !isValid(col)) {
+            throw new java.lang.IllegalArgumentException();
+        }
 
+        if (!isOpen(row, col)) {
+            opens[xyTo1D(row, col)] = true;
+            connectOpenNeighbors(row, col);
+            openSitesNum += 1;
+        }
     }
 
-    // is site (row, col) open?
-    // Open is a status given by open method
-    // corner case: Throw a java.lang.IllegalArgumentException
-    // if any argument to isOpen() is outside its prescribed range
+    private void connectOpenNeighbors(int row, int col) {
+        int[] rowMove = { -1, 1, 0, 0 };
+        int[] colMove = { 0, 0, -1, 1 };
+
+        for (int i = 0; i < rowMove.length; i++) {
+            int neighRow = row + rowMove[i];
+            int neighCol = col + colMove[i];
+
+            if (neighRow == 0) {
+                uf.union(xyTo1D(row, col), virtualTop);
+            }
+            else if (neighRow == N + 1) {
+                uf.union(xyTo1D(row, col), virtualBottom);
+            }
+            else if (isNeighValidToConnect(neighRow, neighCol)) {
+                uf.union(xyTo1D(row, col), xyTo1D(neighRow, neighCol));
+            }
+        }
+    }
+
+    private boolean isNeighValidToConnect(int row, int col) {
+        return isValid(row) && isValid(col) && isOpen(row, col);
+    }
+
     public boolean isOpen(int row, int col) {
-
+        if (!isValid(row) || !isValid(col)) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        return opens[xyTo1D(row, col)];
     }
 
-    // is site (row, col) full?
-    // Full means an open site can be connected to an open site in top
-    // corner case
     public boolean isFull(int row, int col) {
-
+        if (!isValid(row) || !isValid(col)) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        return uf.connected(xyTo1D(row, col), virtualTop);
     }
 
-    // number of open sites
     public int numberOfOpenSites() {
-
+        return openSitesNum;
     }
 
-    // does the system percolate?
-    // If there is a full site in the bottom row
     public boolean percolates() {
-
+        return uf.connected(virtualTop, virtualBottom);
     }
 
-    // test client (optional)
-    public static void main(String[] args) {
+    private int xyTo1D(int row, int col) {
+        return (row - 1) * N + col;
+    }
+
+    private void connectUfIdxToRow(int num, int row) {
+        for (int col = 1; col <= N; col++) {
+            if (isOpen(row, col)) {
+                uf.union(xyTo1D(row, col), num);
+            }
+        }
+    }
+
+    private boolean isValid(int num) {
+        return num >= 1 && num <= N;
     }
 }
