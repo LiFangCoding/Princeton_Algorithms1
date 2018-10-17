@@ -11,7 +11,8 @@ public class Percolation {
     private final int virtualTop;
     private final int virtualBottom;
     private final WeightedQuickUnionUF uf;
-    private boolean[] opens;
+    private final WeightedQuickUnionUF ufWithoutBottom;
+    private boolean[] isOPenBool;
     private int openSitesNum;
 
     public Percolation(int n) {
@@ -25,11 +26,12 @@ public class Percolation {
         virtualTop = 0;
         virtualBottom = gridSize + 1;
 
-        opens = new boolean[gridSize + 2];
-        opens[virtualTop] = true;
-        opens[virtualBottom] = true;
+        isOPenBool = new boolean[gridSize + 2];
+        isOPenBool[virtualTop] = true;
+        isOPenBool[virtualBottom] = true;
 
         uf = new WeightedQuickUnionUF(gridSize + 2);
+        ufWithoutBottom = new WeightedQuickUnionUF(gridSize + 1);
 
         connectUfIdxToRow(virtualTop, 1);
         connectUfIdxToRow(virtualBottom, N);
@@ -41,7 +43,7 @@ public class Percolation {
         }
 
         if (!isOpen(row, col)) {
-            opens[xyTo1D(row, col)] = true;
+            isOPenBool[xyTo1D(row, col)] = true;
             connectOpenNeighbors(row, col);
             openSitesNum += 1;
         }
@@ -57,12 +59,14 @@ public class Percolation {
 
             if (neighRow == 0) {
                 uf.union(xyTo1D(row, col), virtualTop);
+                ufWithoutBottom.union(xyTo1D(row, col), virtualTop);
             }
             else if (neighRow == N + 1) {
                 uf.union(xyTo1D(row, col), virtualBottom);
             }
             else if (isNeighValidToConnect(neighRow, neighCol)) {
                 uf.union(xyTo1D(row, col), xyTo1D(neighRow, neighCol));
+                ufWithoutBottom.union(xyTo1D(row, col), xyTo1D(neighRow, neighCol));
             }
         }
     }
@@ -75,14 +79,14 @@ public class Percolation {
         if (!isValid(row) || !isValid(col)) {
             throw new java.lang.IllegalArgumentException();
         }
-        return opens[xyTo1D(row, col)];
+        return isOPenBool[xyTo1D(row, col)];
     }
 
     public boolean isFull(int row, int col) {
         if (!isValid(row) || !isValid(col)) {
             throw new java.lang.IllegalArgumentException();
         }
-        return uf.connected(xyTo1D(row, col), virtualTop);
+        return ufWithoutBottom.connected(xyTo1D(row, col), virtualTop);
     }
 
     public int numberOfOpenSites() {
