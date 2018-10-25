@@ -11,7 +11,7 @@ public class PercolationStats {
     private final double[] thresholds;
     private final int N;
     private final int T;
-    private final double CONFIDENCE_95 = 1.96;
+    private static final double CONFIDENCE_95 = 1.96;
     private double mean;
     private double stddev;
     private double sqrOfT;
