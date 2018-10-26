@@ -19,11 +19,8 @@ public class Deque<Item> implements Iterable<Item> {
 
         }
 
-        public Node(Item item) {
+        public Node(Item item, Node prev, Node next) {
             this.item = item;
-        }
-
-        public Node(Node prev, Node next) {
             this.prev = prev;
             this.next = next;
         }
@@ -46,11 +43,6 @@ public class Deque<Item> implements Iterable<Item> {
         return size;
     }
 
-    private void addBetween(Item item, Node prev, Node next) {
-        Node node = new Node(prev, next);
-        prev.next = node;
-        next.prev = node;
-    }
 
     // add the item to the front
     public void addFirst(Item item) {
@@ -68,13 +60,23 @@ public class Deque<Item> implements Iterable<Item> {
         addBetween(item, sentinel.prev, sentinel);
     }
 
+    private void addBetween(Item item, Node prev, Node next) {
+        Node node = new Node(item, prev, next);
+        prev.next = node;
+        next.prev = node;
+        size++;
+    }
+
     private Item remove(Node node) {
         Node prev = node.prev;
         Node next = node.next;
         prev.next = next;
         next.prev = prev;
         size--;
-        return node.item;
+
+        Item res = node.item;
+        node = null;
+        return res;
     }
 
     // remove and return the item from the front
@@ -95,29 +97,44 @@ public class Deque<Item> implements Iterable<Item> {
 
     // return an iterator over items in order from front to end
     public Iterator<Item> iterator() {
-        return new dequeIterator();
+        return new DequeIterator();
     }
 
-    private class dequeIterator implements Iterator<Item> {
+    private class DequeIterator implements Iterator<Item> {
         private Node cur = sentinel;
+        int remainSize = size;
 
         public boolean hasNext() {
-            return size > 0;
+            return remainSize > 0;
         }
 
         public Item next() {
+            if (!hasNext()) {
+                throw new java.util.NoSuchElementException();
+            }
             cur = cur.next;
+            remainSize--;
             return cur.item;
         }
 
         public void remove() {
-            throw new java.lang.UnsupportedOperationException;
+            throw new java.lang.UnsupportedOperationException();
         }
     }
 
     // unit testing (optional)
     public static void main(String[] args) {
+        Deque<Integer> deque = new Deque<>();
+        deque.addFirst(2);
+        deque.addFirst(1);
+        deque.addLast(4);
 
+        System.out.println("the size is " + deque.size());
+
+        while (!deque.isEmpty()) {
+            System.out.println(deque.removeLast());
+            System.out.println("the size is " + deque.size());
+        }
     }
 
 }
