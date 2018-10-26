@@ -10,8 +10,7 @@ import java.util.Iterator;
 
 public class Permutation {
     public static void main(String[] args) {
-        RandomizedQueue<String> queue = new RandomizedQueue();
-
+        RandomizedQueue<String> queue = new RandomizedQueue<>();
         int k = Integer.parseInt(args[0]);
 
         while (!StdIn.isEmpty()) {
@@ -19,12 +18,12 @@ public class Permutation {
             queue.enqueue(s);
         }
 
-        Iterator iterator = queue.iterator();
-
+        Iterator<String> iterator = queue.iterator();
         printKItems(k, iterator);
     }
 
-    private static void printKItems(int k, Iterator iterator) {
+
+    private static void printKItems(int k, Iterator<String> iterator) {
         int printNum = 0;
         while (iterator.hasNext() && printNum < k) {
             System.out.println(iterator.next());
