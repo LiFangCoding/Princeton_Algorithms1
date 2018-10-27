@@ -7,7 +7,7 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-    private final int N;
+    private final int n;
     private final int virtualTop;
     private final int virtualBottom;
     private final WeightedQuickUnionUF uf;
@@ -20,8 +20,8 @@ public class Percolation {
             throw new java.lang.IllegalArgumentException();
         }
 
-        N = n;
-        int gridSize = N * N;
+        this.n = n;
+        int gridSize = this.n * this.n;
         openSitesNum = 0;
         virtualTop = 0;
         virtualBottom = gridSize + 1;
@@ -34,7 +34,7 @@ public class Percolation {
         ufWithoutBottom = new WeightedQuickUnionUF(gridSize + 1);
 
         connectUfIdxToRow(virtualTop, 1);
-        connectUfIdxToRow(virtualBottom, N);
+        connectUfIdxToRow(virtualBottom, this.n);
     }
 
     public void open(int row, int col) {
@@ -61,7 +61,7 @@ public class Percolation {
                 uf.union(xyTo1D(row, col), virtualTop);
                 ufWithoutBottom.union(xyTo1D(row, col), virtualTop);
             }
-            else if (neighRow == N + 1) {
+            else if (neighRow == n + 1) {
                 uf.union(xyTo1D(row, col), virtualBottom);
             }
             else if (isNeighValidToConnect(neighRow, neighCol)) {
@@ -98,11 +98,11 @@ public class Percolation {
     }
 
     private int xyTo1D(int row, int col) {
-        return (row - 1) * N + col;
+        return (row - 1) * n + col;
     }
 
     private void connectUfIdxToRow(int num, int row) {
-        for (int col = 1; col <= N; col++) {
+        for (int col = 1; col <= n; col++) {
             if (isOpen(row, col)) {
                 uf.union(xyTo1D(row, col), num);
             }
@@ -110,6 +110,6 @@ public class Percolation {
     }
 
     private boolean isValid(int num) {
-        return num >= 1 && num <= N;
+        return num >= 1 && num <= n;
     }
 }

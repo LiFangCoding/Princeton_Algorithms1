@@ -8,10 +8,10 @@ import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
-    private final double[] thresholds;
-    private final int N;
-    private final int T;
     private static final double CONFIDENCE_95 = 1.96;
+    private final double[] thresholds;
+    private final int n;
+    private final int t;
     private double mean;
     private double stddev;
     private double sqrOfT;
@@ -20,12 +20,12 @@ public class PercolationStats {
         if (n <= 0 || trials <= 0) {
             throw new IllegalArgumentException();
         }
-        N = n;
-        T = trials;
-        sqrOfT = Math.sqrt(T);
+        this.n = n;
+        t = trials;
+        sqrOfT = Math.sqrt(t);
         thresholds = new double[trials];
 
-        for (int i = 0; i < T; i++) {
+        for (int i = 0; i < t; i++) {
             Percolation p = new Percolation(n);
             thresholds[i] = getThreshold(p);
         }
@@ -43,16 +43,16 @@ public class PercolationStats {
             openNum++;
         }
 
-        return openNum / (N * N);
+        return openNum / (n * n);
     }
 
     private int[] getRandomBlockedSite(Percolation p) {
-        int randomRow = StdRandom.uniform(N) + 1;
-        int randomCol = StdRandom.uniform(N) + 1;
+        int randomRow = StdRandom.uniform(n) + 1;
+        int randomCol = StdRandom.uniform(n) + 1;
 
         while (p.isOpen(randomRow, randomCol)) {
-            randomRow = StdRandom.uniform(N) + 1;
-            randomCol = StdRandom.uniform(N) + 1;
+            randomRow = StdRandom.uniform(n) + 1;
+            randomCol = StdRandom.uniform(n) + 1;
         }
 
         return new int[] { randomRow, randomCol };
