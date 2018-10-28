@@ -12,7 +12,6 @@ import java.util.List;
 public class FastCollinearPoints {
     // finds all line segments containing 4 or more points
     private List<LineSegment> segments;
-    private Point[] points;
 
     public FastCollinearPoints(Point[] pointsPara) {
         if (pointsPara == null) {
@@ -25,7 +24,7 @@ public class FastCollinearPoints {
             }
         }
 
-        points = Arrays.copyOfRange(pointsPara, 0, pointsPara.length);
+        Point[] points = Arrays.copyOfRange(pointsPara, 0, pointsPara.length);
         Arrays.sort(points);
         if (isDuplicate(points)) {
             throw new java.lang.IllegalArgumentException();
@@ -33,7 +32,7 @@ public class FastCollinearPoints {
 
         segments = new ArrayList<>();
         int size = points.length;
-        for (int i = 0; i < size; i ++) {
+        for (int i = 0; i < size; i++) {
             Point origin = points[i];
             Point[] pointsSortedBySlope = Arrays.copyOfRange(points, 0, pointsPara.length);
             Arrays.sort(pointsSortedBySlope, origin.slopeOrder());
@@ -41,7 +40,7 @@ public class FastCollinearPoints {
         }
     }
 
-     private void addSegmentFromOrigin(Point origin, Point[] pointsSortedBySlope) {
+    private void addSegmentFromOrigin(Point origin, Point[] pointsSortedBySlope) {
         int len = pointsSortedBySlope.length;
         int j = 0;
 
@@ -57,7 +56,7 @@ public class FastCollinearPoints {
                 numSameWithOrigin++;
             }
             if (numSameWithOrigin >= 3) {
-                if(isOriginFirst(origin, pointsOfSegment)) {
+                if (isOriginFirst(origin, pointsOfSegment)) {
                     segments.add(new LineSegment(origin, pointsSortedBySlope[j - 1]));
                 }
             }
@@ -85,7 +84,7 @@ public class FastCollinearPoints {
 
     // the line segments
     public LineSegment[] segments() {
-        return segments.toArray(new LineSegment[segments.size()]);
+        return segments.toArray(new LineSegment[0]);
     }
 
     public static void main(String[] args) {

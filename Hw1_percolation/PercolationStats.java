@@ -9,23 +9,20 @@ import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
     private static final double CONFIDENCE_95 = 1.96;
-    private final double[] thresholds;
     private final int n;
-    private final int t;
     private double mean;
     private double stddev;
     private double sqrOfT;
-    
+
     public PercolationStats(int n, int trials) {
         if (n <= 0 || trials <= 0) {
             throw new IllegalArgumentException();
         }
         this.n = n;
-        t = trials;
-        sqrOfT = Math.sqrt(t);
-        thresholds = new double[trials];
+        sqrOfT = Math.sqrt(trials);
+        double[] thresholds = new double[trials];
 
-        for (int i = 0; i < t; i++) {
+        for (int i = 0; i < trials; i++) {
             Percolation p = new Percolation(n);
             thresholds[i] = getThreshold(p);
         }

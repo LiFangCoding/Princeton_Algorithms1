@@ -136,9 +136,7 @@ public class Point implements Comparable<Point> {
         public int compare(Point p1, Point p2) {
             double slope1 = slopeTo(p1);
             double slope2 = slopeTo(p2);
-            if (slope1 == slope2) return 0;
-            else if (slope1 > slope2) return 1;
-            else return -1;
+            return Double.compare(slope1, slope2);
         }
     }
 }

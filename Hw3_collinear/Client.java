@@ -7,12 +7,6 @@
 public class Client {
     public static void main(String[] args) {
         // read the n points from a file
-        Point[] points = null;
-
-       // FastCollinearPoints collinear = new FastCollinearPoints(points);
-        BruteCollinearPoints collinear = new BruteCollinearPoints(points);
-
-
         // In in = new In(args[0]);
         // int n = in.readInt();
 
