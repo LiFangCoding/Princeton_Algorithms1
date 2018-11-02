@@ -4,6 +4,7 @@
  *  Description:
  **************************************************************************** */
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -134,7 +135,7 @@ public class Board {
         }
 
         Board that = (Board) y;
-        return (this.initial.equals(that.initial));
+        return Arrays.deepEquals(this.initial, that.initial);
     }
 
     public Iterable<Board> neighbors() {
