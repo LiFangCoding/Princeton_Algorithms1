@@ -84,10 +84,6 @@ public class Solver {
         return null;
     }
 
-    public static void main(String[] args) {
-
-    }
-
     private class comparatorBoard implements Comparator<Board> {
 
         @Override

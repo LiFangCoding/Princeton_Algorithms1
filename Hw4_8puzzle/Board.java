@@ -17,7 +17,7 @@ public class Board {
 
     public Board(int[][] blocks) {
         this.N = blocks.length;
-        this.initial = blocks;
+        this.initial = cloneBlocks(blocks);
         this.manhattan = calManhattan();
         this.hamming = calHamming();
     }
@@ -87,7 +87,7 @@ public class Board {
     }
 
     public Board twin() {
-        int[][] twinBlocks = cloneBlocks();
+        int[][] twinBlocks = cloneBlocks(this.initial);
         int col1 = 0;
         int col2 = 0;
 
@@ -111,11 +111,12 @@ public class Board {
         twinBlocks[i2][col2] = temp;
     }
 
-    private int[][] cloneBlocks() {
+    private int[][] cloneBlocks(int[][] blocks) {
+        int N = blocks.length;
         int[][] cloneBlocks = new int[N][N];
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                cloneBlocks[i][j] = initial[i][j];
+                cloneBlocks[i][j] = blocks[i][j];
             }
         }
         return cloneBlocks;
@@ -148,7 +149,7 @@ public class Board {
             int newrow = idxOfempty[0] + x[i];
             int newcol = idxOfempty[1] + y[i];
             if (isValid(newrow, newcol)) {
-                int[][] neighborBlocks = cloneBlocks();
+                int[][] neighborBlocks = cloneBlocks(this.initial);
                 swap(neighborBlocks, newrow, newcol, idxOfempty[0], idxOfempty[1]);
                 neighbors.add(new Board(neighborBlocks));
             }
@@ -172,15 +173,6 @@ public class Board {
             s.append("\n");
         }
         return s.toString();
-    }
-
-    public static void main(String[] args) {
-        int[][] blocks = {{8, 1, 3}, {4, 0, 2}, {7, 6, 5}};
-
-        Board board = new Board(blocks);
-
-        System.out.println("hamming is " + board.hamming());
-        System.out.println("manhattan is " + board.manhattan());
     }
 
 }
