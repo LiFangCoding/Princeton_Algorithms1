@@ -27,7 +27,6 @@ class BoardTest {
     @org.junit.jupiter.api.Test
     void manhattan() {
         assertEquals(10, board.manhattan());
-
     }
 
     @org.junit.jupiter.api.Test

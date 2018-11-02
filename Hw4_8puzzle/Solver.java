@@ -11,62 +11,64 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Solver {
-    private int moves;
-    private boolean solvable;
+    private int move = 0;
+    private boolean solvable = false;
+    private Queue<Board> solution;
 
-    private Queue<Board> sol;
-    private Queue<Board> solTwin;
-
-
-
-    public Solver(Board board) {
-        moves = 0;
-
+    private Queue<Board> getSol(Board b) {
+        Queue<Board> sol = new LinkedList<>();
         Board predecessor = null;
-        sol = new LinkedList<>();
         MinPQ<Board> minpq = new MinPQ<Board>(new comparatorBoard());
-        minpq.insert(board);
+        minpq.insert(b);
 
-        Board predecessorTwin = null;
-        solTwin = new LinkedList<>();
-        MinPQ<Board> minpqTwin = new MinPQ<Board>( new comparatorBoard());
-        minpqTwin.insert(board.twin());
+        while (!minpq.isEmpty()) {
+            Board search = minpq.delMin();
+            sol.add(search);
 
-        while (!minpq.isEmpty() && !minpqTwin.isEmpty()) {
-            if (searchOneStep(minpq, sol, predecessor)) {
+            if (search.isGoal()) {
                 solvable = true;
                 break;
             }
 
-            if (searchOneStep(minpqTwin, solTwin, predecessorTwin)) {
-                solvable = false;
-                break;
+            for (Board neighbor : search.neighbors()) {
+                if (neighbor.equals(predecessor)) {
+                    continue;
+                }
+                minpq.insert(neighbor);
             }
-            moves++;
-        }
-    }
 
-    private boolean searchOneStep(MinPQ<Board> pq, Queue<Board> sol, Board predecessor) {
-        Board b = pq.delMin();
-        sol.add(b);
-
-        if (b.isGoal()) {
-            return true;
+            predecessor = search;
+            move++;
         }
 
-        addNeighborTopq(b, pq, predecessor);
-        predecessor = b;
-        return false;
+        return sol;
     }
 
-    private void addNeighborTopq(Board b, MinPQ<Board> pq, Board predecessor) {
-        for (Board neighbor : b.neighbors()) {
-            if (neighbor.equals(predecessor)) {
-                continue;
-            }
-            pq.insert(neighbor);
-        }
+    public Solver(Board board) {
+        solution = getSol(board);
     }
+
+
+//    private boolean searchOneStep(MinPQ<Board> pq, Queue<Board> sol) {
+//        predecessor = pq.delMin();
+//        sol.add(predecessor);
+//
+//        if (predecessor.isGoal()) {
+//            return true;
+//        }
+//
+//        addNeighborTopq(predecessor, pq);
+//        return false;
+//    }
+
+//    private void addNeighborTopq(Board b, MinPQ<Board> pq) {
+//        for (Board neighbor : b.neighbors()) {
+//            if (neighbor.equals(b)) {
+//                continue;
+//            }
+//            pq.insert(neighbor);
+//        }
+//    }
 
 
     public boolean isSolvable() {
@@ -74,12 +76,12 @@ public class Solver {
     }
 
     public int moves() {
-        return moves;
+        return move;
     }
 
     public Iterable<Board> solution() {
         if (isSolvable()) {
-            return sol;
+            return solution;
         }
         return null;
     }
@@ -88,8 +90,8 @@ public class Solver {
 
         @Override
         public int compare(Board o1, Board o2) {
-            Integer o1Priority = o1.dimension() + o1.manhattan();
-            Integer o2Priority = o2.dimension() + o2.manhattan();
+            Integer o1Priority = o1.manhattan() + o1.;
+            Integer o2Priority = o2.manhattan();
             return o1Priority.compareTo(o2Priority);
         }
     }
