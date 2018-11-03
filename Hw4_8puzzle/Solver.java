@@ -1,98 +1,130 @@
-/* *****************************************************************************
- *  Name:
- *  Date:
- *  Description:
- **************************************************************************** */
-
 import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.Stack;
 
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Solver {
-    private int move = 0;
-    private boolean solvable = false;
-    private Queue<Board> solution;
-
-    private Queue<Board> getSol(Board b) {
-        Queue<Board> sol = new LinkedList<>();
-        Board predecessor = null;
-        MinPQ<Board> minpq = new MinPQ<Board>(new comparatorBoard());
-        minpq.insert(b);
-
-        while (!minpq.isEmpty()) {
-            Board search = minpq.delMin();
-            sol.add(search);
-
-            if (search.isGoal()) {
-                solvable = true;
-                break;
-            }
-
-            for (Board neighbor : search.neighbors()) {
-                if (neighbor.equals(predecessor)) {
-                    continue;
-                }
-                minpq.insert(neighbor);
-            }
-
-            predecessor = search;
-            move++;
-        }
-
-        return sol;
-    }
+    private SearchNode result;
 
     public Solver(Board board) {
-        solution = getSol(board);
+        if (board == null) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        MinPQ<SearchNode> minpq = new MinPQ<>(new ComparatorSearchNode());
+        SearchNode inital = new SearchNode(0, board, null);
+        result = search(minpq, inital);
     }
 
+    private SearchNode search(MinPQ<SearchNode> minpq, SearchNode initial) {
+        minpq.insert(initial);
 
-//    private boolean searchOneStep(MinPQ<Board> pq, Queue<Board> sol) {
-//        predecessor = pq.delMin();
-//        sol.add(predecessor);
-//
-//        if (predecessor.isGoal()) {
-//            return true;
-//        }
-//
-//        addNeighborTopq(predecessor, pq);
-//        return false;
-//    }
+        while (!minpq.isEmpty()) {
+            SearchNode search = minpq.delMin();
 
-//    private void addNeighborTopq(Board b, MinPQ<Board> pq) {
-//        for (Board neighbor : b.neighbors()) {
-//            if (neighbor.equals(b)) {
-//                continue;
-//            }
-//            pq.insert(neighbor);
-//        }
-//    }
+            if (search.reachGoal()) {
+                return search;
+            }
 
-
-    public boolean isSolvable() {
-        return solvable;
-    }
-
-    public int moves() {
-        return move;
-    }
-
-    public Iterable<Board> solution() {
-        if (isSolvable()) {
-            return solution;
+            for (SearchNode next : search.neighbors()) {
+                SearchNode predecessor = search.predecessor;
+                if (next.equals(predecessor)) {
+                    continue;
+                }
+                minpq.insert(next);
+            }
         }
         return null;
     }
 
-    private class comparatorBoard implements Comparator<Board> {
+
+    public boolean isSolvable() {
+        return result != null;
+    }
+
+    public int moves() {
+        return result.getMove();
+    }
+
+    public Iterable<Board> solution() {
+        if (!isSolvable()) {
+            return null;
+        }
+        Stack<Board> s = new Stack<>();
+
+        while (result != null) {
+            s.push(result.getBoard());
+            result = result.getPredecessor();
+        }
+        return s;
+    }
+
+    private class ComparatorSearchNode implements Comparator<SearchNode> {
 
         @Override
-        public int compare(Board o1, Board o2) {
-            Integer o1Priority = o1.manhattan() + o1.;
-            Integer o2Priority = o2.manhattan();
-            return o1Priority.compareTo(o2Priority);
+        public int compare(SearchNode o1, SearchNode o2) {
+            int o1Priority = o1.getPriority();
+            int o2Priority = o2.getPriority();
+            return Integer.compare(o1Priority, o2Priority);
+        }
+    }
+
+    private class SearchNode {
+        private int move;
+        private Board board;
+        private SearchNode predecessor;
+
+        public SearchNode(int move, Board b, SearchNode predecessor) {
+            this.move = move;
+            this.board = b;
+            this.predecessor = predecessor;
+        }
+
+        public int getMove() {
+            return move;
+        }
+
+        public int getPriority() {
+            return board.manhattan() + move;
+        }
+
+        public Board getBoard() {
+            return board;
+        }
+
+        public SearchNode getPredecessor() {
+            return predecessor;
+        }
+
+        public Iterable<SearchNode> neighbors() {
+            Queue<SearchNode> neighbors = new LinkedList<>();
+
+            for (Board next : this.board.neighbors()) {
+                neighbors.add(new SearchNode(move + 1, next, this));
+            }
+
+            return neighbors;
+        }
+
+        public boolean reachGoal() {
+            return this.board.isGoal();
+        }
+
+        @Override
+        public boolean equals(Object y) {
+            if (y == this) {
+                return true;
+            }
+            if (y == null) {
+                return false;
+            }
+            if (y.getClass() != this.getClass()) {
+                return false;
+            }
+
+            SearchNode that = (SearchNode) y;
+            return this.board.equals(that.board);
         }
     }
 }

@@ -27,13 +27,11 @@
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
-import javafx.css.StyleableDoubleProperty;
 
 public class PuzzleChecker {
 
     public static void main(String[] args) {
-
-//        // for each command-line argument
+        // for each command-line argument
         for (String filename : args) {
 
             // read in the board specified in the filename
@@ -45,7 +43,7 @@ public class PuzzleChecker {
                     tiles[i][j] = in.readInt();
                 }
             }
-
+            
             // solve the slider puzzle
             Board initial = new Board(tiles);
             Solver solver = new Solver(initial);
