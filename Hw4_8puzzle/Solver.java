@@ -21,7 +21,7 @@ public class Solver {
         SearchNode end = search(minpq, inital, twin);
 
         isSolvable = (end != null && end.isOriginal);
-        move = isSolvable ? end.getMove() : -1;
+        move = isSolvable ? end.move : -1;
         sol = getSolution(end);
     }
 
@@ -69,8 +69,8 @@ public class Solver {
         Stack<Board> s = new Stack<>();
 
         while (solEnd != null) {
-            s.push(solEnd.getBoard());
-            solEnd = solEnd.getPredecessor();
+            s.push(solEnd.board);
+            solEnd = solEnd.predecessor;
         }
         return s;
     }
@@ -79,45 +79,42 @@ public class Solver {
 
         @Override
         public int compare(SearchNode o1, SearchNode o2) {
-            if (o1.priority == o2.priority) {
-                return Integer.compare(o1.priority - o1.move, o2.priority - o2.move);
+            if (o1.priority != o2.priority) {
+                return Integer.compare(o1.priority, o2.priority);
+            } else {
+                if (o1.manhatt != o2.manhatt) {
+                    return Integer.compare(o1.manhatt, o2.manhatt);
+                } else {
+                    return Integer.compare(o1.board.hamming(), o2.board.hamming());
+                }
             }
-            return Integer.compare(o1.priority, o2.priority);
         }
     }
 
     private class SearchNode {
         private int move;
+        private int manhatt;
+        private int priority;
+
         private Board board;
         private SearchNode predecessor;
         private boolean isOriginal;
-        private int priority;
+
 
         public SearchNode(Board b, int move, SearchNode predecessor, boolean isOriginal) {
             this.move = move;
             this.board = b;
             this.predecessor = predecessor;
             this.isOriginal = isOriginal;
-            this.priority = board.manhattan() + move;
-        }
-
-        public int getMove() {
-            return move;
-        }
-
-        public Board getBoard() {
-            return board;
-        }
-
-        public SearchNode getPredecessor() {
-            return predecessor;
+            this.manhatt = board.manhattan();
+            this.priority = manhatt + move;
         }
 
         public Iterable<SearchNode> neighbors() {
             Queue<SearchNode> neighbors = new LinkedList<>();
 
             for (Board next : this.board.neighbors()) {
-                neighbors.add(new SearchNode(next, move + 1,this, this.isOriginal));
+                neighbors.add(new SearchNode(next, move + 1, this, this.isOriginal));
             }
 
             return neighbors;
