@@ -54,23 +54,16 @@ public class Board {
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                sum += calManhattanForOne(i, j);
+                if (initial[i][j] == 0) {
+                    continue;
+                }
+                int row = (initial[i][j] - 1) / N;
+                int col = (initial[i][j] - 1) % N;
+
+                sum += Math.abs(i - row) + Math.abs(j - col);
             }
         }
         return sum;
-    }
-
-    private int calManhattanForOne(int i, int j) {
-        if (initial[i][j] == 0) {
-            return 0;
-        }
-        int N = initial.length;
-        int[] idxInGoal = new int[2];
-        int valInitial = initial[i][j];
-        idxInGoal[0] = (valInitial - 1) / N;
-        idxInGoal[1] = (valInitial - 1) % N;
-
-        return Math.abs(i - idxInGoal[0]) + Math.abs(j - idxInGoal[1]);
     }
 
     public boolean isGoal() {
