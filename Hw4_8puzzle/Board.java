@@ -159,12 +159,13 @@ public class Board {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (initial[i][j] == 0) {
-                    return new int[] {i, j};
+                    return new int[]{i, j};
                 }
             }
         }
         return new int[]{0, 0};
     }
+
     private boolean isValid(int row, int col) {
         int N = initial.length;
         return (row >= 0) && (row < N) && (col >= 0) && (col < N);
