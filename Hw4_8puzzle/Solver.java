@@ -6,17 +6,23 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Solver {
-    private SearchNode result;
+    private boolean isSolvable;
+    private int move;
+    private Iterable<Board> sol;
 
     public Solver(Board board) {
         if (board == null) {
             throw new java.lang.IllegalArgumentException();
         }
+
         MinPQ<SearchNode> minpq = new MinPQ<>(new ComparatorSearchNode());
         SearchNode inital = new SearchNode(board, 0, null, true);
         SearchNode twin = new SearchNode(board.twin(), 0, null, false);
+        SearchNode end = search(minpq, inital, twin);
 
-        result = search(minpq, inital, twin);
+        isSolvable = (end != null && end.isOriginal);
+        move = isSolvable ? end.getMove() : -1;
+        sol = getSolution(end);
     }
 
     private SearchNode search(MinPQ<SearchNode> minpq, SearchNode initial, SearchNode twin) {
@@ -43,25 +49,28 @@ public class Solver {
 
 
     public boolean isSolvable() {
-        return result != null && result.isOriginal;
+        return isSolvable;
     }
 
     public int moves() {
-        if (isSolvable()) {
-            return result.getMove();
-        }
-        return -1;
+        return move;
     }
 
     public Iterable<Board> solution() {
+        return sol;
+    }
+
+    private Iterable<Board> getSolution(SearchNode end) {
         if (!isSolvable()) {
             return null;
         }
+
+        SearchNode solEnd = end;
         Stack<Board> s = new Stack<>();
 
-        while (result != null) {
-            s.push(result.getBoard());
-            result = result.getPredecessor();
+        while (solEnd != null) {
+            s.push(solEnd.getBoard());
+            solEnd = solEnd.getPredecessor();
         }
         return s;
     }
@@ -70,12 +79,10 @@ public class Solver {
 
         @Override
         public int compare(SearchNode o1, SearchNode o2) {
-            int o1Priority = o1.priority;
-            int o2Priority = o2.priority;
-            if (o1Priority == o2Priority) {
+            if (o1.priority == o2.priority) {
                 return Integer.compare(o1.priority - o1.move, o2.priority - o2.move);
             }
-            return Integer.compare(o1Priority, o2Priority);
+            return Integer.compare(o1.priority, o2.priority);
         }
     }
 

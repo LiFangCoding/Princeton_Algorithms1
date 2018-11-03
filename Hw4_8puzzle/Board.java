@@ -146,14 +146,15 @@ public class Board {
         int[] x = {1, -1, 0, 0};
         int[] y = {0, 0, 1, -1};
         int[] idxOfempty = getIdxEmpty();
+        int[][] neighborBlocks = cloneBlocks(this.initial);
 
         for (int i = 0; i < 4; i++) {
             int newrow = idxOfempty[0] + x[i];
             int newcol = idxOfempty[1] + y[i];
             if (isValid(newrow, newcol)) {
-                int[][] neighborBlocks = cloneBlocks(this.initial);
                 swap(neighborBlocks, newrow, newcol, idxOfempty[0], idxOfempty[1]);
                 neighbors.add(new Board(neighborBlocks));
+                swap(neighborBlocks, newrow, newcol, idxOfempty[0], idxOfempty[1]);
             }
         }
 
