@@ -13,12 +13,15 @@ public class Solver {
             throw new java.lang.IllegalArgumentException();
         }
         MinPQ<SearchNode> minpq = new MinPQ<>(new ComparatorSearchNode());
-        SearchNode inital = new SearchNode(0, board, null);
-        result = search(minpq, inital);
+        SearchNode inital = new SearchNode(board, 0, null, true);
+        SearchNode twin = new SearchNode(board.twin(), 0, null, false);
+
+        result = search(minpq, inital, twin);
     }
 
-    private SearchNode search(MinPQ<SearchNode> minpq, SearchNode initial) {
+    private SearchNode search(MinPQ<SearchNode> minpq, SearchNode initial, SearchNode twin) {
         minpq.insert(initial);
+        minpq.insert(twin);
 
         while (!minpq.isEmpty()) {
             SearchNode search = minpq.delMin();
@@ -40,11 +43,17 @@ public class Solver {
 
 
     public boolean isSolvable() {
-        return result != null;
+        if (result != null && result.isOriginal == true) {
+            return true;
+        }
+        return false;
     }
 
     public int moves() {
-        return result.getMove();
+        if (isSolvable()) {
+            return result.getMove();
+        }
+        return -1;
     }
 
     public Iterable<Board> solution() {
@@ -74,11 +83,14 @@ public class Solver {
         private int move;
         private Board board;
         private SearchNode predecessor;
+        //Added
+        private boolean isOriginal;
 
-        public SearchNode(int move, Board b, SearchNode predecessor) {
+        public SearchNode(Board b, int move, SearchNode predecessor, boolean isOriginal) {
             this.move = move;
             this.board = b;
             this.predecessor = predecessor;
+            this.isOriginal = isOriginal;
         }
 
         public int getMove() {
@@ -101,7 +113,7 @@ public class Solver {
             Queue<SearchNode> neighbors = new LinkedList<>();
 
             for (Board next : this.board.neighbors()) {
-                neighbors.add(new SearchNode(move + 1, next, this));
+                neighbors.add(new SearchNode(next, move + 1,this, this.isOriginal));
             }
 
             return neighbors;
