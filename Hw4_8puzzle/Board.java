@@ -12,18 +12,15 @@ public class Board {
     private int[][] initial;
     private int manhattan;
     private int hamming;
-    private int N;
-    private int[] idxOfempty;
 
     public Board(int[][] blocks) {
-        this.N = blocks.length;
         this.initial = cloneBlocks(blocks);
         this.manhattan = calManhattan();
         this.hamming = calHamming();
     }
 
     public int dimension() {
-        return N;
+        return initial.length;
     }
 
     public int hamming() {
@@ -32,6 +29,7 @@ public class Board {
 
     private int calHamming() {
         int hamSum = 0;
+        int N = initial.length;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (i == N - 1 && j == N - 1) {
@@ -52,6 +50,8 @@ public class Board {
 
     private int calManhattan() {
         int sum = 0;
+        int N = initial.length;
+
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 sum += calManhattanForOne(i, j);
@@ -62,9 +62,9 @@ public class Board {
 
     private int calManhattanForOne(int i, int j) {
         if (initial[i][j] == 0) {
-            idxOfempty = new int[]{i, j};
             return 0;
         }
+        int N = initial.length;
         int[] idxInGoal = new int[2];
         int valInitial = initial[i][j];
         idxInGoal[0] = (valInitial - 1) / N;
@@ -74,6 +74,8 @@ public class Board {
     }
 
     public boolean isGoal() {
+        int N = initial.length;
+
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (i == N - 1 && j == N - 1) {
@@ -90,6 +92,7 @@ public class Board {
         int[][] twinBlocks = cloneBlocks(this.initial);
         int col1 = 0;
         int col2 = 0;
+        int N = initial.length;
 
         for (int i = 0; i < N; i++) {
             if (twinBlocks[0][i] != 0) {
@@ -115,9 +118,7 @@ public class Board {
         int N = blocks.length;
         int[][] cloneBlocks = new int[N][N];
         for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                cloneBlocks[i][j] = blocks[i][j];
-            }
+            System.arraycopy(blocks[i], 0, cloneBlocks[i], 0, N);
         }
         return cloneBlocks;
     }
@@ -144,6 +145,7 @@ public class Board {
 
         int[] x = {1, -1, 0, 0};
         int[] y = {0, 0, 1, -1};
+        int[] idxOfempty = getIdxEmpty();
 
         for (int i = 0; i < 4; i++) {
             int newrow = idxOfempty[0] + x[i];
@@ -158,12 +160,25 @@ public class Board {
         return neighbors;
     }
 
+    private int[] getIdxEmpty() {
+        int N = this.initial.length;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (initial[i][j] == 0) {
+                    return new int[] {i, j};
+                }
+            }
+        }
+        return new int[]{0, 0};
+    }
     private boolean isValid(int row, int col) {
+        int N = initial.length;
         return (row >= 0) && (row < N) && (col >= 0) && (col < N);
     }
 
     @Override
     public String toString() {
+        int N = initial.length;
         StringBuilder s = new StringBuilder();
         s.append(N + "\n");
         for (int i = 0; i < N; i++) {

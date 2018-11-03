@@ -43,10 +43,7 @@ public class Solver {
 
 
     public boolean isSolvable() {
-        if (result != null && result.isOriginal == true) {
-            return true;
-        }
-        return false;
+        return result != null && result.isOriginal;
     }
 
     public int moves() {
@@ -73,8 +70,11 @@ public class Solver {
 
         @Override
         public int compare(SearchNode o1, SearchNode o2) {
-            int o1Priority = o1.getPriority();
-            int o2Priority = o2.getPriority();
+            int o1Priority = o1.priority;
+            int o2Priority = o2.priority;
+            if (o1Priority == o2Priority) {
+                return Integer.compare(o1.priority - o1.move, o2.priority - o2.move);
+            }
             return Integer.compare(o1Priority, o2Priority);
         }
     }
@@ -83,22 +83,19 @@ public class Solver {
         private int move;
         private Board board;
         private SearchNode predecessor;
-        //Added
         private boolean isOriginal;
+        private int priority;
 
         public SearchNode(Board b, int move, SearchNode predecessor, boolean isOriginal) {
             this.move = move;
             this.board = b;
             this.predecessor = predecessor;
             this.isOriginal = isOriginal;
+            this.priority = board.manhattan() + move;
         }
 
         public int getMove() {
             return move;
-        }
-
-        public int getPriority() {
-            return board.manhattan() + move;
         }
 
         public Board getBoard() {
