@@ -31,7 +31,6 @@ import edu.princeton.cs.algs4.StdOut;
 public class PuzzleChecker {
 
     public static void main(String[] args) {
-
         // for each command-line argument
         for (String filename : args) {
 
@@ -44,11 +43,21 @@ public class PuzzleChecker {
                     tiles[i][j] = in.readInt();
                 }
             }
-
+            
             // solve the slider puzzle
             Board initial = new Board(tiles);
             Solver solver = new Solver(initial);
+
+            // new added
+            System.out.println(solver.isSolvable() == solver.isSolvable());
+            System.out.println(solver.solution() == solver.solution());
+
             StdOut.println(filename + ": " + solver.moves());
+
+
+            for (Board b : solver.solution()) {
+                StdOut.print(b.toString());
+            }
         }
     }
 }
