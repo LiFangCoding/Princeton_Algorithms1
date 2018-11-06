@@ -44,6 +44,7 @@ public class PointSET {
 
     public void draw() {
 
+
     }           // draw all points to standard draw
 
     public Iterable<Point2D> range(RectHV rect) {
@@ -73,7 +74,7 @@ public class PointSET {
         }
 
         for (Point2D pointInSet : set) {
-            if (nearest == null {
+            if (nearest == null) {
                 nearest = pointInSet;
             }
 
