@@ -36,12 +36,11 @@ public class KdTree {
     private Node put(Node x, Point2D key, boolean horizon) {
         if (x == null) return new Node(key);
 
-        if (key.x() == x.p.x() && key.y() == x.p.y()) {
-            return x;
-        }
-
         int cmp = getCmp(x, key, horizon);
 
+        if (cmp == 0) {
+            return x;
+        }
         if (cmp < 0) {
             x.lb = put(x.lb, key, !horizon);
         }
@@ -60,22 +59,23 @@ public class KdTree {
     private boolean contains(Node x, Point2D key, boolean horizon) {
         if (x == null) return false;
 
-        if (key.x() == x.p.x() && key.y() == x.p.y()) {
-            return true;
-        }
-
         int cmp = getCmp(x, key, horizon);
 
-        if (cmp < 0) return contains(x.lb, key, !horizon);
+        if (cmp == 0) return true;
+        else if (cmp < 0) return contains(x.lb, key, !horizon);
         else return contains(x.rt, key, !horizon);
     }
 
-    private int getCmp(Node x, Point2D key, Boolean horizon) {
+    private int getCmp(Node x, Point2D key, boolean horizon) {
+        if (key.x() == x.p.x() && key.y() == x.p.y()) {
+            return 0;
+        }
+
         if (horizon) {
-            return Double.compare(key.x(), x.p.x());
+            return key.x() < x.p.x() ? -1 : 1;
         }
         else {
-            return Double.compare(key.y(), x.p.y());
+            return key.y() < x.p.y() ? -1 : 1;
         }
     }
 
@@ -146,6 +146,5 @@ public class KdTree {
         public Node(Point2D p) {
             this.p = p;
         }
-
     }
 }
