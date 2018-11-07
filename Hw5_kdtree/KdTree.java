@@ -28,13 +28,13 @@ public class KdTree {
 
     public void insert(Point2D p) {
         if (!contains(p)) {
-            root = put(root, p, true);
+            root = put(root, p, true, new RectHV(0, 0, 1, 1));
         }
         size++;
     }
 
-    private Node put(Node x, Point2D key, boolean horizon) {
-        if (x == null) return new Node(key);
+    private Node put(Node x, Point2D key, boolean horizon, RectHV rect) {
+        if (x == null) return new Node(key, rect);
 
         int cmp = getCmp(x, key, horizon);
 
@@ -42,10 +42,13 @@ public class KdTree {
             return x;
         }
         if (cmp < 0) {
-            x.lb = put(x.lb, key, !horizon);
+            if (horizon) x.lb = put(x.lb, key, !horizon, x.leftRect());
+            if (!horizon) x.lb = put(x.lb, key, !horizon, x.bottomRect());
         }
         else {
-            x.rt = put(x.rt, key, !horizon);
+            if (horizon) x.rt = put(x.rt, key, !horizon, x.rightRect());
+            if (!horizon) x.rt = put(x.rt, key, !horizon, x.topRect());
+
         }
 
         return x;
@@ -88,20 +91,20 @@ public class KdTree {
             return;
         }
 
-        StdDraw.setPenColor(StdDraw.BLACK);
-        StdDraw.setPenRadius(0.01);
-        StdDraw.point(node.p.x(), node.p.y());
-
         if (horizon) {
             StdDraw.setPenColor(StdDraw.RED);
             StdDraw.setPenRadius(0.01);
-            StdDraw.line(node.p.x(), 0, node.p.x(), 1);
+            StdDraw.line(node.p.x(), node.rect.ymin(), node.p.x(), node.rect.ymax());
         }
         else {
-            StdDraw.setPenColor(StdDraw.RED);
+            StdDraw.setPenColor(StdDraw.BLUE);
             StdDraw.setPenRadius(0.01);
-            StdDraw.line(0, node.p.y(), 1, node.p.y());
+            StdDraw.line(node.rect.xmin(), node.p.y(), node.rect.xmax(), node.p.y());
         }
+
+        StdDraw.setPenColor(StdDraw.BLACK);
+        StdDraw.setPenRadius(0.01);
+        StdDraw.point(node.p.x(), node.p.y());
 
         draw(node.lb, !horizon);
         draw(node.rt, !horizon);
@@ -120,6 +123,14 @@ public class KdTree {
     }  // a nearest neighbor in the set to point p; null if the set is empty
 
     public static void main(String[] args) {
+
+        // Node first = new Node(new Point2D(0.7, 0.2), new RectHV(0, 0, 1, 1));
+        // System.out.println(first.leftRect());
+        //
+        // Node second = new Node(new Point2D(0.5, 0.4), first.leftRect());
+        //
+        // System.out.println(second.bottomRect());
+
         KdTree kd = new KdTree();
 
         kd.insert(new Point2D(0.7, 0.2));
@@ -146,5 +157,32 @@ public class KdTree {
         public Node(Point2D p) {
             this.p = p;
         }
+
+
+        public Node(Point2D p, RectHV rect) {
+            this.p = p;
+            this.rect = rect;
+        }
+
+        public RectHV leftRect() {
+            double x = p.x();
+            return new RectHV(this.rect.xmin(), this.rect.ymin(), x, this.rect.ymax());
+        }
+
+        public RectHV rightRect() {
+            double x = p.x();
+            return new RectHV(x, this.rect.ymin(), this.rect.xmax(), this.rect.ymax());
+        }
+
+        public RectHV topRect() {
+            double y = p.y();
+            return new RectHV(this.rect.xmin(), y, this.rect.xmax(), this.rect.ymax());
+        }
+
+        public RectHV bottomRect() {
+            double y = p.y();
+            return new RectHV(this.rect.xmin(), this.rect.ymin(), this.rect.xmax(), y);
+        }
+
     }
 }
