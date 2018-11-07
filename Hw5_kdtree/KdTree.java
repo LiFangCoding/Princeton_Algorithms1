@@ -27,10 +27,38 @@ public class KdTree {
     }
 
     public void insert(Point2D p) {
+        if (p == null) {
+            throw new IllegalArgumentException("calls contains() with a null key");
+        }
         if (!contains(p)) {
             root = put(root, p, true, new RectHV(0, 0, 1, 1));
+            size++;
         }
-        size++;
+    }
+
+    public boolean contains(Point2D key) {
+        if (key == null) throw new IllegalArgumentException("calls contains() with a null key");
+        return contains(root, key, true);
+    }
+
+    public Iterable<Point2D> range(RectHV rect) {
+        if (rect == null) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        Queue<Point2D> queue = new Queue<>();
+        addNode(root, rect, queue);
+        return queue;
+    }
+
+    public void draw() {
+        draw(root, true);
+    }
+
+    public Point2D nearest(Point2D p) {
+        if (p == null) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        return nearest(root, p, true);
     }
 
     private Node put(Node x, Point2D key, boolean horizon, RectHV rect) {
@@ -54,10 +82,6 @@ public class KdTree {
         return x;
     }
 
-    public boolean contains(Point2D key) {
-        if (key == null) throw new IllegalArgumentException("calls contains() with a null key");
-        return contains(root, key, true);
-    }
 
     private boolean contains(Node x, Point2D key, boolean horizon) {
         if (x == null) return false;
@@ -70,7 +94,7 @@ public class KdTree {
     }
 
     private int getCmp(Node x, Point2D key, boolean horizon) {
-        if (key.x() == x.p.x() && key.y() == x.p.y()) {
+        if (key.equals(x.p)) {
             return 0;
         }
 
@@ -82,9 +106,119 @@ public class KdTree {
         }
     }
 
-    public void draw() {
-        draw(root, true);
-    }           // draw all points to standard draw
+
+    private void addNode(Node x, RectHV rect, Queue<Point2D> queue) {
+        if (x == null) {
+            return;
+        }
+
+        if (rect.contains(x.p)) {
+            queue.enqueue(x.p);
+        }
+
+        if (x.lb != null && x.lb.rect.intersects(rect)) {
+            addNode(x.lb, rect, queue);
+
+        }
+        if (x.rt != null && x.rt.rect.intersects(rect)) {
+            addNode(x.rt, rect, queue);
+        }
+    }
+
+
+    private Point2D nearest(Node x, Point2D query, boolean horizon) {
+        if (x == null) {
+            return null;
+        }
+
+        Point2D nearest = x.p;
+        int cmp = getCmp(x, query, horizon);
+
+        if (cmp == 0) {
+            return nearest;
+        }
+
+        else if (cmp < 0) {
+            if (x.lb != null && x.lb.rect.distanceSquaredTo(query) < nearest
+                    .distanceSquaredTo(query)) {
+
+                Point2D leftNearest = nearest(x.lb, query, !horizon);
+
+                if (leftNearest != null && leftNearest.distanceSquaredTo(query) < nearest
+                        .distanceSquaredTo(query)) {
+                    nearest = leftNearest;
+                }
+            }
+
+            if (x.rt != null && x.rt.rect.distanceSquaredTo(query) < nearest
+                    .distanceSquaredTo(query)) {
+
+                Point2D rightNearest = nearest(x.rt, query, !horizon);
+
+                if (rightNearest != null && rightNearest.distanceSquaredTo(query) < nearest
+                        .distanceSquaredTo(query)) {
+                    nearest = rightNearest;
+                }
+            }
+        }
+
+        else {
+            if (x.rt != null && x.rt.rect.distanceSquaredTo(query) < nearest
+                    .distanceSquaredTo(query)) {
+                Point2D rightNearest = nearest(x.rt, query, !horizon);
+                if (rightNearest.distanceSquaredTo(query) < nearest.distanceSquaredTo(query)) {
+                    nearest = rightNearest;
+                }
+            }
+
+            if (x.lb != null && x.lb.rect.distanceSquaredTo(query) < nearest
+                    .distanceSquaredTo(query)) {
+                Point2D leftNearest = nearest(x.lb, query, !horizon);
+                if (leftNearest.distanceSquaredTo(query) < nearest.distanceSquaredTo(query)) {
+                    nearest = leftNearest;
+                }
+            }
+        }
+
+        return nearest;
+    }
+
+
+    private static class Node {
+        private Point2D p;
+        private RectHV rect;
+        private Node lb;
+        private Node rt;
+        private double x;
+        private double y;
+
+        public Node(Point2D p) {
+            this.p = p;
+        }
+
+        public Node(Point2D p, RectHV rect) {
+            this.p = p;
+            this.rect = rect;
+            this.x = p.x();
+            this.y = p.y();
+        }
+
+        public RectHV leftRect() {
+            return new RectHV(this.rect.xmin(), this.rect.ymin(), x, this.rect.ymax());
+        }
+
+        public RectHV rightRect() {
+            return new RectHV(x, this.rect.ymin(), this.rect.xmax(), this.rect.ymax());
+        }
+
+        public RectHV topRect() {
+            return new RectHV(this.rect.xmin(), y, this.rect.xmax(), this.rect.ymax());
+        }
+
+        public RectHV bottomRect() {
+            return new RectHV(this.rect.xmin(), this.rect.ymin(), this.rect.xmax(), y);
+        }
+    }
 
     private void draw(Node node, boolean horizon) {
         if (node == null) {
@@ -110,79 +244,21 @@ public class KdTree {
         draw(node.rt, !horizon);
     }
 
-    //TODO
-    public Iterable<Point2D> range(RectHV rect) {
-        return new Queue<Point2D>();
-
-    }       // all points that are inside the rectangle (or on the boundary)
-
-    //TODO
-    public Point2D nearest(Point2D p) {
-        return new Point2D(0, 0);
-
-    }  // a nearest neighbor in the set to point p; null if the set is empty
-
     public static void main(String[] args) {
-
-        // Node first = new Node(new Point2D(0.7, 0.2), new RectHV(0, 0, 1, 1));
-        // System.out.println(first.leftRect());
-        //
-        // Node second = new Node(new Point2D(0.5, 0.4), first.leftRect());
-        //
-        // System.out.println(second.bottomRect());
-
         KdTree kd = new KdTree();
-
         kd.insert(new Point2D(0.7, 0.2));
         kd.insert(new Point2D(0.5, 0.4));
         kd.insert(new Point2D(0.2, 0.3));
         kd.insert(new Point2D(0.4, 0.7));
         kd.insert(new Point2D(0.9, 0.6));
+        kd.insert(new Point2D(0.9, 0.6));
+        kd.insert(new Point2D(0.9, 0.6));
 
-        System.out.println("the size should be 5, size is " + kd.size());
-        System.out
-                .println("kd contain be false. contains is " + kd.contains(new Point2D(0.7, 0.3)));
-        System.out.println("kd contain be true. contains is " + kd.contains(new Point2D(0.2, 0.3)));
+        Point2D query = new Point2D(0.5, 0.6);
+        Point2D nearest = kd.nearest(query);
 
-        kd.draw();
+        System.out.println(nearest);
+        System.out.println(nearest.distanceSquaredTo(query));
     }
 
-
-    private static class Node {
-        private Point2D p;      // the point
-        private RectHV rect;    // the axis-aligned rectangle corresponding to this node
-        private Node lb;        // the left/bottom subtree
-        private Node rt;        // the right/top subtree
-
-        public Node(Point2D p) {
-            this.p = p;
-        }
-
-
-        public Node(Point2D p, RectHV rect) {
-            this.p = p;
-            this.rect = rect;
-        }
-
-        public RectHV leftRect() {
-            double x = p.x();
-            return new RectHV(this.rect.xmin(), this.rect.ymin(), x, this.rect.ymax());
-        }
-
-        public RectHV rightRect() {
-            double x = p.x();
-            return new RectHV(x, this.rect.ymin(), this.rect.xmax(), this.rect.ymax());
-        }
-
-        public RectHV topRect() {
-            double y = p.y();
-            return new RectHV(this.rect.xmin(), y, this.rect.xmax(), this.rect.ymax());
-        }
-
-        public RectHV bottomRect() {
-            double y = p.y();
-            return new RectHV(this.rect.xmin(), this.rect.ymin(), this.rect.xmax(), y);
-        }
-
-    }
 }

@@ -7,6 +7,7 @@
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.RectHV;
+import edu.princeton.cs.algs4.StdDraw;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -27,12 +28,11 @@ public class PointSET {
     }
 
     public void insert(Point2D p) {
-        if (p == null) {
-            throw new java.lang.IllegalArgumentException();
+        if (this.contains(p)) {
+            return;
         }
-        if (!set.contains(p)) {
-            set.add(p);
-        }
+
+        set.add(p);
     }
 
     public boolean contains(Point2D p) {
@@ -43,9 +43,13 @@ public class PointSET {
     }
 
     public void draw() {
+        for (Point2D p : set) {
+            StdDraw.setPenColor(StdDraw.YELLOW);
+            StdDraw.setPenRadius(0.03);
+            StdDraw.point(p.x(), p.y());
+        }
 
-
-    }           // draw all points to standard draw
+    }
 
     public Iterable<Point2D> range(RectHV rect) {
         if (rect == null) {
@@ -83,9 +87,5 @@ public class PointSET {
             }
         }
         return nearest;
-    }
-
-    public static void main(String[] args) {
-
     }
 }
