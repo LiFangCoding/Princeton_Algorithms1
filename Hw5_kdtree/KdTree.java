@@ -12,6 +12,7 @@ import edu.princeton.cs.algs4.StdDraw;
 public class KdTree {
     private Node root;
     private int size;
+    private Point2D nearest;
 
     public KdTree() {
         root = null;
@@ -42,10 +43,13 @@ public class KdTree {
     }
 
     public Iterable<Point2D> range(RectHV rect) {
+        Queue<Point2D> queue = new Queue<>();
         if (rect == null) {
             throw new java.lang.IllegalArgumentException();
         }
-        Queue<Point2D> queue = new Queue<>();
+        if (isEmpty()) {
+            return queue;
+        }
         addNode(root, rect, queue);
         return queue;
     }
@@ -58,7 +62,12 @@ public class KdTree {
         if (p == null) {
             throw new java.lang.IllegalArgumentException();
         }
-        return nearest(root, p, true);
+        if (isEmpty()) {
+            return null;
+        }
+        nearest = root.p;
+        nearest(root, p, true);
+        return nearest;
     }
 
     private Node put(Node x, Point2D key, boolean horizon, RectHV rect) {
@@ -126,61 +135,43 @@ public class KdTree {
     }
 
 
-    private Point2D nearest(Node x, Point2D query, boolean horizon) {
+    private void nearest(Node x, Point2D query, boolean horizon) {
         if (x == null) {
-            return null;
+            return;
         }
 
-        Point2D nearest = x.p;
+        // System.out.println("node route is " + x.p.toString());
+
+        // Point2D nearest = x.p;
+
         int cmp = getCmp(x, query, horizon);
 
-        if (cmp == 0) {
-            return nearest;
+        if (x.p.distanceSquaredTo(query) < nearest
+                .distanceSquaredTo(query)) {
+            nearest = x.p;
         }
 
-        else if (cmp < 0) {
+        if (cmp < 0) {
             if (x.lb != null && x.lb.rect.distanceSquaredTo(query) < nearest
                     .distanceSquaredTo(query)) {
-
-                Point2D leftNearest = nearest(x.lb, query, !horizon);
-
-                if (leftNearest != null && leftNearest.distanceSquaredTo(query) < nearest
-                        .distanceSquaredTo(query)) {
-                    nearest = leftNearest;
-                }
+                nearest(x.lb, query, !horizon);
             }
-
             if (x.rt != null && x.rt.rect.distanceSquaredTo(query) < nearest
                     .distanceSquaredTo(query)) {
-
-                Point2D rightNearest = nearest(x.rt, query, !horizon);
-
-                if (rightNearest != null && rightNearest.distanceSquaredTo(query) < nearest
-                        .distanceSquaredTo(query)) {
-                    nearest = rightNearest;
-                }
+                nearest(x.rt, query, !horizon);
             }
         }
 
         else {
             if (x.rt != null && x.rt.rect.distanceSquaredTo(query) < nearest
                     .distanceSquaredTo(query)) {
-                Point2D rightNearest = nearest(x.rt, query, !horizon);
-                if (rightNearest.distanceSquaredTo(query) < nearest.distanceSquaredTo(query)) {
-                    nearest = rightNearest;
-                }
+                nearest(x.rt, query, !horizon);
             }
-
             if (x.lb != null && x.lb.rect.distanceSquaredTo(query) < nearest
                     .distanceSquaredTo(query)) {
-                Point2D leftNearest = nearest(x.lb, query, !horizon);
-                if (leftNearest.distanceSquaredTo(query) < nearest.distanceSquaredTo(query)) {
-                    nearest = leftNearest;
-                }
+                nearest(x.lb, query, !horizon);
             }
         }
-
-        return nearest;
     }
 
 
@@ -246,15 +237,15 @@ public class KdTree {
 
     public static void main(String[] args) {
         KdTree kd = new KdTree();
-        kd.insert(new Point2D(0.7, 0.2));
-        kd.insert(new Point2D(0.5, 0.4));
-        kd.insert(new Point2D(0.2, 0.3));
-        kd.insert(new Point2D(0.4, 0.7));
-        kd.insert(new Point2D(0.9, 0.6));
-        kd.insert(new Point2D(0.9, 0.6));
-        kd.insert(new Point2D(0.9, 0.6));
+        kd.insert(new Point2D(0.0, 0.375));
+        kd.insert(new Point2D(0.375, 0.625));
+        kd.insert(new Point2D(0.625, 0.875));
+        kd.insert(new Point2D(0.25, 1.0));
+        kd.insert(new Point2D(0.75, 0.125));
 
-        Point2D query = new Point2D(0.5, 0.6);
+        System.out.println("the sequence shoule be " + "(0, 0.375), (0.375, 0.625, 0.75,0.125)");
+
+        Point2D query = new Point2D(0.125, 0.0);
         Point2D nearest = kd.nearest(query);
 
         System.out.println(nearest);
